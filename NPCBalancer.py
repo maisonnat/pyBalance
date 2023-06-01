@@ -85,10 +85,7 @@ class NPCBalancer:
             self.change_report.append({"old": old_npc.as_dict(), "new": new_npc.as_dict()})
 
             # Replace the old values in the NPC section
-            npc = re.sub(r'GiveEXP=\d+', f'GiveEXP={math.ceil(give_exp)}', npc)
-            npc = re.sub(r'GiveGLD=\d+', f'GiveGLD={math.ceil(give_gld)}', npc)
-            npc = re.sub(r'MinHP=\d+', f'MinHP={min_hp}', npc)
-            npc = re.sub(r'MaxHP=\d+', f'MaxHP={max_hp}', npc)
+            npc = re.sub(r'(GiveEXP|GiveGLD|MinHP|MaxHP)=\d+', lambda match: f'{match.group(1)}={math.ceil(float(match.group(0)[match.group(0).index("=")+1:])*self.exp_multiplier if match.group(1) in ("GiveEXP", "GiveGLD") else int(match.group(0)[match.group(0).index("=")+1:])*self.level_multiplier)}', npc)
         except AttributeError:
             print(f"Failed to parse NPC: {npc}")
 

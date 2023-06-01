@@ -1,3 +1,29 @@
+
+"""
+Para obtener los NPC con la mejor experiencia, accede a: http://localhost:8000/npcs/best_for_exp?num=5
+Esto devolvera una lista de los mejores NPC en funcion de la experiencia.
+Puedes cambiar el valor de num para obtener mas o menos NPC en la lista.
+
+Para obtener los NPC con la mejor cantidad de oro, accede a: http://localhost:8000/npcs/best_for_gold?num=3
+Esto devolvera una lista de los mejores NPC en funcion de la cantidad de oro.
+Puedes cambiar el valor de num para obtener mas o menos NPC en la lista.
+
+Para obtener los NPC con la mejor relacion total (experiencia y oro), accede a: http://localhost:8000/npcs/best_for_total?num=10
+Esto devolvera una lista de los mejores NPC en funcion de la relacion total.
+Puedes cambiar el valor de num para obtener mas o menos NPC en la lista.
+
+Para obtener los NPC con el mejor dano, accede a: http://localhost:8000/npcs/best_for_damage?num=2
+Esto devolvera una lista de los mejores NPC en funcion del dano.
+Puedes cambiar el valor de num para obtener mas o menos NPC en la lista.
+
+Para obtener el tiempo estimado para subir de nivel desde un nivel actual, accede a: http://localhost:8000/time_to_level_up/15
+Esto devolvera el tiempo estimado, el mejor NPC y la cantidad total de oro necesarios para subir de nivel desde el nivel 15.
+Puedes cambiar el numero en la URL para indicar el nivel actual.
+
+Para obtener el mejor NPC para matar segun el dano del jugador, accede a: http://localhost:8000/best_npc_to_kill/200?party_members=3
+Esto devolvera el mejor NPC para matar segun el dano del jugador (200) y la cantidad de miembros en el grupo (3).
+ Puedes cambiar el numero en la URL para indicar el dano del jugador y el numero de miembros en el grupo.
+"""
 from typing import Union
 import re
 from NPC import NPC
@@ -42,27 +68,33 @@ class BestNPCFinder:
                 evasion_power = 0  # This value is unknown.
 
                 if code not in SPECIAL_EVENT_NPCS:
-                    self.npcs.append(
-                        NPC(code, name, give_exp, give_gld, min_hp, max_hp, attack_power, min_hit, max_hit, defence,
-                            attack_power, evasion_power, level, respawn_time))
+                    npc_instance = NPC(code, name, give_exp, give_gld, min_hp, max_hp, attack_power, min_hit, max_hit,
+                                       defence,
+                                       attack_power, evasion_power, level, respawn_time)
+                    self.npcs.append(npc_instance)
+                    print("NPC created:", npc_instance)
             except AttributeError:
                 print(f"Failed to parse NPC: {npc}")
 
     def best_for_exp(self, num=1):
         sorted_npcs = sorted(self.npcs, key=lambda npc: npc.exp_ratio(), reverse=True)[:num]
+        print("NPCs for experience:", sorted_npcs)
         return sorted_npcs
 
     def best_for_gold(self, num=1):
         sorted_npcs = sorted(self.npcs, key=lambda npc: npc.gold_ratio(), reverse=True)[:num]
+        print("NPCs for gold:", sorted_npcs)
         return sorted_npcs
 
     def best_for_total(self, num=1):
         sorted_npcs = sorted(self.npcs, key=lambda npc: npc.total_ratio(), reverse=True)[:num]
+        print("NPCs for total:", sorted_npcs)
         return sorted_npcs
 
     def best_for_damage(self, num=1):
         damage_npcs = [npc for npc in self.npcs if npc.max_hp <= self.max_damage]
         sorted_npcs = sorted(damage_npcs, key=lambda npc: npc.total_ratio(), reverse=True)[:num]
+        print("NPCs for best damage:", sorted_npcs)
         return sorted_npcs
 
     def best_npc_to_kill(self, player_damage: int = 300, party_members: int = 1) -> Union[NPC, None]:
@@ -83,4 +115,5 @@ class BestNPCFinder:
 
         npcs_efficiency.sort(key=lambda x: x[1], reverse=True)
         best_npc, _ = npcs_efficiency[0] if npcs_efficiency else (None, None)
+        print("NPCs for best npc:", best_npc)
         return best_npc
